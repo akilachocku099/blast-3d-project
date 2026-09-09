@@ -55,18 +55,19 @@ src/
 └── App.tsx
 
 public/data-bin/              # preprocessed binary buffers + manifest.json
-scripts/convert_to_binary.py  # raw CSVs → binary buffers
+raw-data/                     # original survey/block model CSVs
+preprocess.py                 # raw CSVs → binary buffers
 ```
 
 ## Why the data pipeline exists
 
-The raw CSVs are huge — around 220MB combined, 1.6M+ rows just for the surface data. Parsing that live in the browser wasn't going to work, so `scripts/convert_to_binary.py` converts everything into Float32 binary buffers ahead of time, downsampling the dense point clouds to around 120–200k points each. Still dense enough to look right, light enough to actually load.
+The raw CSVs (in `raw-data/`) are huge — around 220MB combined, 1.6M+ rows just for the surface data. Parsing that live in the browser wasn't going to work, so `preprocess.py` converts everything into Float32 binary buffers in `public/data-bin/`, downsampling the dense point clouds to around 120–200k points each. Still dense enough to look right, light enough to actually load.
 
 To regenerate it from raw CSVs:
 
 ```bash
 pip install pandas numpy
-python3 scripts/convert_to_binary.py
+python3 preprocess.py
 ```
 
 ## Running it locally
