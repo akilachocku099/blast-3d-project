@@ -1,0 +1,148 @@
+{
+  "preSurface": {
+    "count": 37935,
+    "floatsPerPoint": 3
+  },
+  "pstSurface": {
+    "count": 39699,
+    "floatsPerPoint": 3
+  },
+  "blastholes": {
+    "count": 520
+  },
+  "preString": {
+    "segments": 1
+  },
+  "pstString": {
+    "segments": 1
+  },
+  "blockmodel": {
+    "count": 60996,
+    "gradeFields": [
+      "grade_01",
+      "grade_02",
+      "grade_03",
+      "grade_04",
+      "grade_05",
+      "grade_06",
+      "grade_07",
+      "grade_08",
+      "grade_09",
+      "grade_10",
+      "grade_11"
+    ],
+    "defaultGradeField": "grade_01",
+    "gradeRanges": {
+      "grade_01": {
+        "min": 0.0,
+        "max": 155.071403
+      },
+      "grade_02": {
+        "min": 0.0,
+        "max": 16.928595
+      },
+      "grade_03": {
+        "min": 0.0,
+        "max": 50.747617
+      },
+      "grade_04": {
+        "min": 0.0,
+        "max": 6.358535
+      },
+      "grade_05": {
+        "min": 0.0,
+        "max": 6.755925
+      },
+      "grade_06": {
+        "min": 0.0,
+        "max": 1.831382
+      },
+      "grade_07": {
+        "min": 0.0,
+        "max": 3061.634819
+      },
+      "grade_08": {
+        "min": 0.0,
+        "max": 1.706604
+      },
+      "grade_09": {
+        "min": 0.0,
+        "max": 5.816047
+      },
+      "grade_10": {
+        "min": 0.0,
+        "max": 15.19405
+      },
+      "grade_11": {
+        "min": 0.0,
+        "max": 0.623176
+      }
+    }
+  },
+  "mbm": {
+    "count": 39624,
+    "gradeFields": [
+      "grade_01",
+      "grade_02",
+      "grade_03",
+      "grade_04",
+      "grade_05",
+      "grade_06",
+      "grade_07",
+      "grade_08",
+      "grade_09",
+      "grade_10",
+      "grade_11"
+    ],
+    "defaultGradeField": "grade_01",
+    "gradeRanges": {
+      "grade_01": {
+        "min": 0.0,
+        "max": 155.071403
+      },
+      "grade_02": {
+        "min": 0.0,
+        "max": 16.928595
+      },
+      "grade_03": {
+        "min": 0.0,
+        "max": 50.747617
+      },
+      "grade_04": {
+        "min": 0.0,
+        "max": 6.358535
+      },
+      "grade_05": {
+        "min": 0.0,
+        "max": 6.755925
+      },
+      "grade_06": {
+        "min": 0.0,
+        "max": 1.831382
+      },
+      "grade_07": {
+        "min": 0.0,
+        "max": 3061.634819
+      },
+      "grade_08": {
+        "min": 0.0,
+        "max": 1.706604
+      },
+      "grade_09": {
+        "min": 0.0,
+        "max": 5.816047
+      },
+      "grade_10": {
+        "min": 0.0,
+        "max": 15.19405
+      },
+      "grade_11": {
+        "min": 0.0,
+        "max": 0.623176
+      }
+    },
+    "dispMin": 0.0,
+    "dispMax": 85.07643622061282,
+    "dispMean": 5.872585958737728
+  }
+}

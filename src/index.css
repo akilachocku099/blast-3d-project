@@ -1,0 +1,675 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root {
+  --bg: #0b0e11;
+  --panel: rgba(18, 23, 28, 0.82);
+  --panel-border: rgba(139, 152, 165, 0.18);
+  --text: #e8ecef;
+  --text-muted: #8b98a5;
+  --accent-amber: #d9a03a;
+  --accent-teal: #2a8c99;
+  --accent-red: #c92a2a;
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-mono);
+  overflow: hidden;
+}
+
+.app-root {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+}
+
+.canvas-wrap {
+  position: absolute;
+  inset: 0;
+}
+
+.view-toggle {
+  position: absolute;
+  bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.03em;
+  font-weight: 700;
+  background: var(--accent-teal);
+  color: #06181b;
+  border: 1px solid var(--accent-teal);
+  border-radius: 7px;
+  padding: 9px 18px;
+  cursor: pointer;
+  transition: filter 0.15s, transform 0.15s;
+  box-shadow: 0 4px 16px rgba(42, 140, 153, 0.45);
+}
+
+.view-toggle:hover {
+  filter: brightness(1.1);
+  transform: translateX(-50%) scale(1.03);
+}
+
+
+.compare-wrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--panel-border);
+}
+
+/* Three-column grid (not flex-center) so the title sits optically centred on
+   the screen regardless of how wide the back button or hint text get. */
+.compare-intro {
+  flex: 0 0 auto;
+  z-index: 25;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 20px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--panel-border);
+  padding: 10px 20px;
+}
+
+.compare-back {
+  justify-self: start;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  padding: 7px 13px;
+  border-radius: 6px;
+  border: 1px solid rgba(139, 152, 165, 0.6);
+  background: rgba(139, 152, 165, 0.16);
+  color: #ffffff;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.compare-back:hover {
+  color: var(--text);
+  border-color: var(--accent-teal);
+  background: rgba(42, 140, 153, 0.12);
+}
+
+.compare-heading {
+  text-align: center;
+}
+
+.compare-heading h2 {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  margin: 0;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.compare-hint {
+  justify-self: end;
+  margin: 0;
+  font-size: 10px;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  text-align: right;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .compare-hint {
+    display: none;
+  }
+}
+
+.compare-intro-text {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.6;
+  text-align: center;
+  max-width: 720px;
+}
+
+.view-toggle-inline {
+  position: static;
+  transform: none;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.view-toggle-inline:hover {
+  transform: scale(1.03);
+}
+
+.compare-panes-row {
+  display: flex;
+  flex: 1 1 auto;
+  gap: 2px;
+  min-height: 0;
+}
+
+.compare-pane {
+  position: relative;
+  flex: 1 1 50%;
+  min-width: 0;
+  background: var(--bg);
+  /* Establishes a fresh stacking context so the canvas can never paint over
+     the label/stats/legend above it, regardless of DOM order. */
+  isolation: isolate;
+}
+
+.compare-pane canvas {
+  position: relative;
+  z-index: 1;
+}
+
+.compare-label {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 20;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  padding: 5px 10px;
+  pointer-events: none;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+
+.compare-stats {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  z-index: 20;
+  display: flex;
+  gap: 10px;
+  max-width: calc(100% - 32px);
+  flex-wrap: wrap;
+  pointer-events: none;
+}
+
+.compare-stats > div {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 0.03em;
+  line-height: 1.5;
+  max-width: 220px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+
+.compare-stats b {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 15px;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.compare-legend {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 20;
+  width: 200px;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+
+.compare-legend .radio-row {
+  margin-top: 0;
+}
+
+.header {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.header h1 {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  margin: 0;
+  color: var(--text);
+}
+
+.header .eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-amber);
+  margin: 0 0 4px 0;
+}
+
+.header .sub {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 4px 0 0 0;
+}
+
+.panel {
+  position: absolute;
+  z-index: 10;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+  padding: 16px 18px 18px 18px;
+}
+
+.panel-controls {
+  top: 20px;
+  right: 20px;
+  width: 276px;
+  /* Legend panel occupies the bottom 240px on the same right-hand column —
+     stop short of it so the two never butt up against each other. */
+  max-height: calc(100vh - 300px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* Soft fade at the scroll edge, so a cut-off row reads as "more below"
+     rather than a clipped, broken panel. */
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 24px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 24px), transparent 100%);
+}
+
+.panel-legend {
+  bottom: 20px;
+  right: 20px;
+  width: 276px;
+  max-height: 220px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.panel-controls::-webkit-scrollbar,
+.panel-legend::-webkit-scrollbar {
+  width: 6px;
+}
+
+.panel-controls::-webkit-scrollbar-track,
+.panel-legend::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.panel-controls::-webkit-scrollbar-thumb,
+.panel-legend::-webkit-scrollbar-thumb {
+  background: rgba(139, 152, 165, 0.35);
+  border-radius: 3px;
+}
+
+.panel-controls::-webkit-scrollbar-thumb:hover,
+.panel-legend::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 152, 165, 0.55);
+}
+
+.panel-controls,
+.panel-legend {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(139, 152, 165, 0.35) transparent;
+}
+
+.panel-timeline {
+  bottom: 20px;
+  left: 20px;
+  width: 420px;
+}
+
+.panel-title {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin: 0 0 8px 0;
+}
+
+.panel-section-title {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(232, 236, 239, 0.62);
+  margin: 18px 0 6px 0;
+  padding-top: 14px;
+  border-top: 1px solid rgba(139, 152, 165, 0.14);
+}
+
+.panel-section-title:first-of-type {
+  margin-top: 4px;
+  padding-top: 0;
+  border-top: none;
+}
+
+.layer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: none;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.layer-row:last-child {
+  border-bottom: none;
+}
+
+/* Inline explanation under a toggle — sits inside the panel rhythm without
+   competing with the layer rows themselves. */
+.layer-hint {
+  margin: 0 0 4px 0;
+  padding-left: 18px;
+  font-size: 10px;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  color: rgba(139, 152, 165, 0.8);
+  border-left: 1px solid rgba(139, 152, 165, 0.18);
+}
+
+.layer-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.toggle {
+  position: relative;
+  flex-shrink: 0;
+  width: 34px;
+  height: 18px;
+  border-radius: 9px;
+  background: rgba(139, 152, 165, 0.25);
+  cursor: pointer;
+  transition: background 0.15s ease;
+  border: none;
+  padding: 0;
+}
+
+.toggle.on {
+  background: var(--accent-teal);
+}
+
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.15s ease;
+}
+
+.toggle.on::after {
+  transform: translateX(16px);
+}
+
+.radio-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.radio-btn {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--panel-border);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s ease;
+}
+
+.radio-btn.active {
+  background: rgba(42, 140, 153, 0.18);
+  border-color: var(--accent-teal);
+  color: var(--text);
+}
+
+/* Native <select> ignores background/color from a shared button class in
+   most browsers (it keeps its own default light box), which is what made
+   this read as "missing" on the dark panel. Style it explicitly instead. */
+.grade-select {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--accent-teal);
+  background-color: var(--panel);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.grade-select:focus {
+  outline: 2px solid var(--accent-teal);
+  outline-offset: 1px;
+}
+
+.grade-select option {
+  background-color: var(--bg);
+  color: var(--text);
+}
+
+.legend-gradient {
+  height: 10px;
+  border-radius: 5px;
+  background: linear-gradient(
+    to right,
+    #1c3a4a 0%,
+    #1f7a8c 25%,
+    #d9a03a 50%,
+    #e05a2e 75%,
+    #c92a2a 100%
+  );
+  margin: 6px 0 4px 0;
+}
+
+.charge-legend-gradient {
+  height: 10px;
+  border-radius: 5px;
+  background: linear-gradient(
+    to right,
+    #2d1b4e 0%,
+    #5b2a86 25%,
+    #8e3ba8 50%,
+    #c24d9c 75%,
+    #e63dc9 100%
+  );
+  margin: 6px 0 4px 0;
+}
+
+.legend-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.legend-caption {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 10px;
+  line-height: 1.5;
+}
+
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.slider-row input[type='range'] {
+  flex: 1;
+  accent-color: var(--accent-amber);
+}
+
+.timeline-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.timeline-label .stage {
+  color: var(--accent-amber);
+  font-weight: 600;
+}
+
+.play-btn {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--accent-amber);
+  background: rgba(217, 160, 58, 0.12);
+  color: var(--accent-amber);
+  cursor: pointer;
+}
+
+.play-btn:hover {
+  background: rgba(217, 160, 58, 0.22);
+}
+
+.stats-row {
+  display: flex;
+  gap: 16px;
+  margin-top: 10px;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.stats-row b {
+  color: var(--text);
+  display: block;
+  font-size: 13px;
+  font-family: var(--font-display);
+}
+
+.info-icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid var(--text-muted);
+  color: var(--text-muted);
+  font-size: 9px;
+  font-family: var(--font-mono);
+  cursor: help;
+  margin-left: 3px;
+  flex-shrink: 0;
+}
+
+.info-icon .tooltip {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  bottom: 130%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 190px;
+  background: #1a2027;
+  border: 1px solid var(--panel-border);
+  color: var(--text);
+  font-size: 11px;
+  line-height: 1.4;
+  padding: 8px 10px;
+  border-radius: 6px;
+  z-index: 20;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+}
+
+.info-icon:hover .tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+.export-btn {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--panel-border);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  margin-top: 18px;
+  width: 100%;
+}
+
+.export-btn:hover {
+  border-color: var(--accent-teal);
+  background: rgba(42, 140, 153, 0.12);
+}
+
+@media (max-width: 560px) {
+  .panel-controls,
+  .panel-legend {
+    width: calc(100vw - 40px);
+    left: 20px;
+    right: 20px;
+  }
+
+  .panel-controls {
+    max-height: calc(100vh - 320px);
+  }
+}
