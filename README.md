@@ -1,39 +1,104 @@
-# Site 1 — Blast Reconciliation Viewer
+<div align="center">
 
-An interactive 3D tool for visualizing how ore moves during a blast — built with React, TypeScript, and React Three Fiber.
+# BenchMark3D — Blast Reconciliation Viewer
 
-## What this shows
+An interactive 3D tool for visualizing how ore moves during a mine blast.
 
-- **Pre/post-blast terrain** — the ground surface before and after the blast
-- **Blast holes** — the 520 drilled holes, angled and colored by explosive charge (kg)
-- **Block model** — the underlying ore grid, colored by grade
-- **Ore displacement** — the core feature: a scrubbable timeline showing every tracked ore block moving from its original position to where it actually landed after the blast, colored by either displacement distance or ore grade
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white&style=flat-square)
+![TypeScript](https://img.shields.io/badge/TypeScript-blue?logo=typescript&logoColor=white&style=flat-square)
+![Vite](https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white&style=flat-square)
+![Three.js](https://img.shields.io/badge/Three.js-black?logo=three.js&logoColor=white&style=flat-square)
+![Netlify](https://img.shields.io/badge/deployed-Netlify-00C7B7?logo=netlify&logoColor=white&style=flat-square)
 
-## Getting started
+**[🌐 Live site](https://benchmark3d.netlify.app)** · **[🎥 Demo video](https://drive.google.com/file/d/1D4yhJO-Ba_jJUsLrJTL0Ah6qFyQxSxpk/view?usp=drive_link)**
 
-```bash
-npm install
-npm run dev
+</div>
+
+---
+
+## What it does
+
+Blast reconciliation data — pre/post-blast surfaces, drilled hole positions, block model grades, displacement vectors — usually gets reviewed as flat cross-sections or spreadsheets. This puts it in 3D instead, so you can actually see how ore moved instead of just comparing numbers before and after.
+
+The main piece is a scrubbable timeline: drag it and watch every tracked ore block travel from its original spot to where it actually landed after the blast.
+
+## Features
+
+- **Pre/post-blast terrain** — ground surface before and after the blast, side by side
+- **Blast holes** — all 520 drilled holes, angled and colored by explosive charge (kg)
+- **Block model** — the ore grid, colored by grade
+- **Displacement timeline** — scrubbable animation of ore movement, colored by distance moved or grade
+- **Dual view** — compare two states at once
+
+## Stack
+
+- **React 19 + TypeScript + Vite** — app shell and build
+- **React Three Fiber + drei + three.js** — the actual 3D scene
+- **Python (pandas, numpy)** — preprocessing raw survey CSVs into binary buffers
+
+## Project structure
+
+```
+src/
+├── components/
+│   ├── BlastHoles.tsx        # drilled holes, angled + colored by charge
+│   ├── BlockModel.tsx        # ore grid colored by grade
+│   ├── Boundary.tsx          # pit/site boundary
+│   ├── Displacement.tsx      # the displacement timeline
+│   ├── SmoothOreSurface.tsx  # interpolated surface from displaced blocks
+│   └── Terrain.tsx           # pre/post-blast terrain
+├── hooks/
+│   └── useBinary.ts          # loads the preprocessed binary data
+├── lib/
+│   ├── colorRamp.ts          # shared color scale
+│   └── types.ts
+└── App.tsx
+
+public/data-bin/              # preprocessed binary buffers + manifest.json
+raw-data/                     # original survey/block model CSVs
+preprocess.py                 # raw CSVs → binary buffers
 ```
 
-Then open the local URL shown in the terminal (usually http://localhost:5173).
+## Why the data pipeline exists
 
-## Data pipeline
+The raw CSVs (in `raw-data/`) are huge — around 220MB combined, 1.6M+ rows just for the surface data. Parsing that live in the browser wasn't going to work, so `preprocess.py` converts everything into Float32 binary buffers in `public/data-bin/`, downsampling the dense point clouds to around 120–200k points each. Still dense enough to look right, light enough to actually load.
 
-The raw CSVs (in `raw-data/`) are large (~220MB combined, 1.6M+ rows in the surface files). Rather than parsing that live in the browser, `preprocess.py` converts everything into compact Float32 binary buffers in `public/data-bin/`, downsampling the two surface point clouds and the block model/mbm datasets to ~120–200k points each — enough density to read clearly, small enough to load and render smoothly in a browser.
+To regenerate it from raw CSVs:
 
-To regenerate the binary data from the raw CSVs:
 ```bash
 pip install pandas numpy
 python3 preprocess.py
 ```
 
-## Design notes
+## Running it locally
 
-- All coordinates are re-centered around the mean of the pre-blast surface, and the geological Z-axis (elevation) is mapped to three.js's Y-axis (up), so everything lines up in the same 3D space.
-- Displacement lines are only drawn for blocks that moved more than a threshold, to keep the "flow" visualization readable rather than a cluttered mess of near-zero-length lines.
-- Color scale: cool blue-teal (low) → amber → red (high) — used consistently for both grade and displacement magnitude so the legend logic stays simple.
+```bash
+git clone https://github.com/akilachocku099/blast-3d-project.git
+cd blast-3d-project
+npm install
+npm run dev
+```
 
-## Stack
+Opens at `http://localhost:5173`.
 
-React 19, TypeScript, Vite, @react-three/fiber, @react-three/drei, three.js, papaparse (data prep reference).
+```bash
+npm run build
+```
+
+builds to `dist/`.
+
+## Notes on the 3D setup
+
+- Everything's re-centered around the mean of the pre-blast surface, and the geological Z-axis (elevation) maps to three.js's Y-axis, so all the layers line up correctly.
+- Displacement lines only draw for blocks that moved past a threshold — otherwise the view gets cluttered with near-zero-length lines that don't add anything.
+- Color scale is the same everywhere (blue-teal → amber → red, low → high), so grade and displacement share one legend.
+
+## What I'd do differently next
+
+- Preprocessing is a manual step right now — new datasets need to run through the Python script before they show up. Could move some of that in-browser for smaller datasets.
+- Downsampling keeps things fast but loses some fine detail from the full-resolution CSVs. LOD loading would let close-up views recover that without slowing the initial load.
+- Camera position and the selected timeline frame reset on refresh — worth persisting so a specific moment in the reconciliation can be shared directly.
+
+## Background
+
+Started as a take-home technical assessment, then extended on my own with a dual-view mode and a handful of bug fixes.
