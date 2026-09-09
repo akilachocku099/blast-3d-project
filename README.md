@@ -99,6 +99,3 @@ builds to `dist/`.
 - Downsampling keeps things fast but loses some fine detail from the full-resolution CSVs. LOD loading would let close-up views recover that without slowing the initial load.
 - Camera position and the selected timeline frame reset on refresh — worth persisting so a specific moment in the reconciliation can be shared directly.
 
-## Background
-
-Started as a take-home technical assessment, then extended on my own with a dual-view mode and a handful of bug fixes.
